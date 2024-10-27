@@ -1,0 +1,8 @@
+region              = "northeurope"
+resource_group_name = "demo-rg"
+VnetName            = "demo-vnet"
+aks_cluster_name    = "demo-aks-cluster"
+aks_version         = "1.28.3"
+default_subnet_name = "default-sn"
+aks_subnet_name     = "aks-sn"
+env                 = "dev"
