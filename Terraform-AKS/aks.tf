@@ -27,4 +27,20 @@ resource "azurerm_kubernetes_cluster" "aks" {
   identity {
     type = "SystemAssigned"
   }
+
+    # Enable Application Gateway Ingress Controller
+  ingress_application_gateway {
+    gateway_name = var.appgw_name
+    subnet_id = azurerm_subnet.subnet1.id
+  }
+  
+  tags = {
+    env = var.env
+  }
+}
+
+resource "azurerm_role_assignment" "aks_agic_integration" {
+  scope = azurerm_virtual_network.vnet.id
+  role_definition_name = "Network Contributor"
+  principal_id = azurerm_kubernetes_cluster.aks.ingress_application_gateway[0].ingress_application_gateway_identity[0].object_id
 }

@@ -38,3 +38,8 @@ variable "aks_subnet_name" {
 variable "env" {
   type = string
 }
+
+variable "appgw_name" {
+  type        = string
+  description = "application gateway name"
+}
