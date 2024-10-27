@@ -17,11 +17,6 @@ variable "VnetName" {
   default = "Custom vnet name"
 }
 
-variable "VnetName" {
-  type    = string
-  default = "Custom vnet name"
-}
-
 variable "aks_cluster_name" {
   type        = string
   description = "AKS cluster name"
