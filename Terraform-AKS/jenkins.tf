@@ -10,4 +10,8 @@ resource "helm_release" "jenkins" {
     name = "installCRDS"
     value = "true"
   }
+  set {
+    name  = "controller.jenkinsUriPrefix"
+    value = "/jenkins"
+  }
 }

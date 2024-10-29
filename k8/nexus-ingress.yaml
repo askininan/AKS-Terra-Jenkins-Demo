@@ -1,17 +1,19 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: jenkins-ingress
-  namespace: jenkins
+  name: nexus-ingress
+  namespace: nexus
+  annotations:
+    appgw.ingress.kubernetes.io/backend-path-prefix: "/"
 spec:
   ingressClassName: azure-application-gateway
   rules:
   - http:
       paths:
-      - path: /jenkins
+      - path: /
         pathType: Prefix
         backend:
           service:
-            name: jenkins
+            name: nexus-nexus-repository-manager 
             port:
-              number: 8080
+              number: 8081
