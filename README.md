@@ -52,6 +52,8 @@ The nexus admin password and username are kept in the nexus container at /nexus-
 
 After loging in to nexus UI a docker hosted repo is created with creating http port 8082 and https port 8083 and default blob storage is chosen. Under Realms in Security section, add Docker Bearer Token to active.
 
+Need to add nexus credentials as k8 secret: kubectl create secret docker-registry nexus-docker-secret -n jenkins --docker-server=http://<public-ip>:8082 --docker-username=<user_name> --docker-password="<passowrd>"
+
 In order to koniko to use nexus credentials, the username and password should be added in the config.toml in the working directory in kaniko container, these steps are created as a shell script in jenkins. Also, to get rid of the error 'http: server gave HTTP response to HTTPS client' error, your url should be added to config.toml as well, as mentioned below:
 
 ```
