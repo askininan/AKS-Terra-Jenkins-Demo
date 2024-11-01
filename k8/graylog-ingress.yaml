@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: graylog-ingress
+  namespace: graylog
+spec:
+  ingressClassName: azure-application-gateway
+  rules:
+  - http:
+      paths:
+      - path: /graylog
+        pathType: Prefix
+        backend:
+          service:
+            name: graylog
+            port:
+              number: 8090

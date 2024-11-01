@@ -1,3 +1,4 @@
+
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -17,3 +18,14 @@ spec:
             name: nexus-nexus-repository-manager 
             port:
               number: 8081
+        backend:
+          service:
+            name: nexus-nexus-repository-manager 
+            port:
+              number: 8082
+        backend:
+          service:
+            name: nexus-nexus-repository-manager 
+            port:
+              number: 8083
+              
