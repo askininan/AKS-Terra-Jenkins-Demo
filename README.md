@@ -38,7 +38,7 @@ kubectl apply -f .
 Jenkins is deployed via Helm at port 8080, and an ingress resource is created serving on path /jenkins. Jenkins admin username and password are held as a kubernetes secret in jenkins namespace.
 
 
-Plugins Github and Workspace Cleanup are installed via Jenkins UI and a demo-pipeline is created. The pipeline is integrated with demo-app public repository and under Build Triggers "GitHub hook trigger for GITScm polling" is enabled to automatically trigger start the jenkins pipeline when git push is conducted to our github repo demo-app.
+Plugins Github and Workspace Cleanup are installed via Jenkins UI and a demo-pipeline is created. The pipeline is integrated with demo-app public repository and under Build Triggers "GitHub hook trigger for GITScm polling" is enabled to automatically trigger start the jenkins pipeline when git push is conducted to our github repo demo-app. After integration of our Jenkins server to the github repo Demo-app, from the repository settings on Github, under Webhooks, a webhook for the jenkins server should be added as such: http://<public_ip>/path/github-webhook/. The webhook connectivity can be tested via resending paylog on Recent Deliveries tab.
 
 A Jenkinsfile is created that builds and run test for our DotNet HelloWorld app, and after that creates an image via Kaniko, and pushes the image to Nexus repository. As pipeline agent a kaniko.yaml is called and created on kubernetes, that serves kaniko and dotnet sdk as containers, and all the jenkins steps are executed on these containers. A dockerfile is created to build the image for dotnet runtime, that is pushed by koniko. 
 
