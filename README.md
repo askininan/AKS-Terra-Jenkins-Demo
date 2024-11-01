@@ -184,11 +184,12 @@ After Graylog installation is completed, a new ingress resource is deployed unde
 
 ## Further Development
 
-1. Graylog installation can become seamless by solving vm.max_map_count through adding an extraInitContainer to opensearch values.yaml that runs command: sysctl -w vm.max_map_count=262144 as root user. This solution also may require installing an older version of Opensearch.
+1. HTTPS connections instead of current HTTP. An SSL certification can be used on ingress by manually deploying or utilizing cert-manager for secure connection.
 
-2. HTTPS connection instead of current HTTP. An SSL certification can be used on ingress by manually deploying or utilizing cert-manager for secure connection.
+2. A hostname can be defined on ingress for certain paths. For that, an ANAME record should be declared through Terraform.
 
-3. A hostname can be defined on ingress for certain paths. For that, an ANAME record should be declared through Terraform.
+3. Autoscaling for AKS cluster can be enabled to improve resilience.
 
-4. Autoscaling for AKS cluster can be enabled to improve resilience.
+4. Graylog installation can become seamless by solving vm.max_map_count through adding an extraInitContainer to opensearch values.yaml that runs command: sysctl -w vm.max_map_count=262144 as root user. This solution also may require installing an older version of Opensearch.
 
+5. Next step to finalize CI/CD kaniko push image part should be sorted with right config.toml configurations. After that k8 deployment of the image part should be added to jenkins pipeline with helm utilization.
