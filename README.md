@@ -27,7 +27,7 @@ After AKS infra is deployed, to connect your cluster:
 az account set --subscription <AZ_Subs_ID>
 az aks get-credentials --resource-group gor-rg --name gor-aks-cluster --overwrite-existing
 ```
-Deploy k8 ingress resource for graylog under k8 folder:
+Deploy k8 ingress resource for jenkins, nexus and graylog under k8 folder:
 ```
 kubectl apply -f .
 ```
@@ -42,75 +42,75 @@ Plugins Github and Workspace Cleanup are installed via Jenkins UI and a demo-pip
 
 A Jenkinsfile is created that builds and run test for our DotNet HelloWorld app, and after that creates an image via Kaniko, and pushes the image to Nexus repository. As pipeline agent a kaniko.yaml is called and created on kubernetes, that serves kaniko and dotnet sdk as containers, and all the jenkins steps are executed on these containers. A dockerfile is created to build the image for dotnet runtime, that is pushed by koniko. 
 
-For nexus authentication, it's credentials are added to global domain credentials, and the username and password are put in ${WORKSPACE}/.docker/config.json via shell scripting as a pipeline step.
+For nexus authentication, it's credentials are added to global domain credentials, and the username and password are put in ${WORKSPACE}/containerd/config.toml via shell scripting as a pipeline step.
 
 
 ## Nexus Setup
 
-Nexus chart is deployed via Helm. An ingress resource is created serving Nexus on path /. Further, 8082 and 8083 ports are added for the same path that are serving nexus repositories.
+Nexus chart is deployed via Helm on port 8081 for UI. An ingress resource is created serving Nexus on path /. Further, 8082 and 8083 ports are added for the same path that are serving nexus repositories.
 The nexus admin password and username are kept in the nexus container at /nexus-data/admin.password path. 
 
 After loging in to nexus UI a docker hosted repo is created with creating http port 8082 and https port 8083 and default blob storage is chosen. Under Realms in Security section, add Docker Bearer Token to active.
 
 In order to koniko to use nexus credentials, the username and password should be added in the config.toml in the working directory in kaniko container, these steps are created as a shell script in jenkins. Also, to get rid of the error 'http: server gave HTTP response to HTTPS client' error, your url should be added to config.toml as well, as mentioned below:
 
+```
 withCredentials([usernamePassword(credentialsId: 'nexus', passwordVariable: 'PSW', usernameVariable: 'USERNAME')]){
 
-'''
-sh '''
+  sh '''
 
-echo "Creating Containerd config for insecure registry"
+  echo "Creating Containerd config for insecure registry"
 
-mkdir -p ${CONTAINERD_CONFIG}
+  mkdir -p ${CONTAINERD_CONFIG}
 
-cat <<EOF > ${CONTAINERD_CONFIG}/config.toml
+  cat <<EOF > ${CONTAINERD_CONFIG}/config.toml
 
-[plugins."io.containerd.grpc.v1.cri".registry]
+  [plugins."io.containerd.grpc.v1.cri".registry]
 
-config_path = "${CONTAINERD_CONFIG}/certs.d"
+  config_path = "${CONTAINERD_CONFIG}/certs.d"
 
-[plugins."io.containerd.grpc.v1.cri".registry.configs]
+  [plugins."io.containerd.grpc.v1.cri".registry.configs]
 
-[plugins."io.containerd.grpc.v1.cri".registry.configs."${NEXUS_URL}${REPO_PORT}"]
+  [plugins."io.containerd.grpc.v1.cri".registry.configs."${NEXUS_URL}${REPO_PORT}"]
 
-[plugins."io.containerd.grpc.v1.cri".registry.configs."${NEXUS_URL}${REPO_PORT}".auth]
+  [plugins."io.containerd.grpc.v1.cri".registry.configs."${NEXUS_URL}${REPO_PORT}".auth]
 
-username = "${USERNAME}"
+  username = "${USERNAME}"
 
-password = "${PSW}"
+  password = "${PSW}"
 
-'''
+  '''
 
-sh '''
+  sh '''
 
-mkdir -p ${CONTAINERD_CONFIG}/certs.d/docker.io/
+  mkdir -p ${CONTAINERD_CONFIG}/certs.d/docker.io/
 
-cat <<EOF > ${CONTAINERD_CONFIG}/certs.d/docker.io/hosts.toml
+  cat <<EOF > ${CONTAINERD_CONFIG}/certs.d/docker.io/hosts.toml
 
-server = "https://registry-1.docker.io"
+  server = "https://registry-1.docker.io"
 
-[host."https://{docker.mirror.url}"]
+  [host."https://{docker.mirror.url}"]
 
-capabilities = ["pull", "resolve"]
+  capabilities = ["pull", "resolve"]
 
-'''
+  '''
 
-sh '''
+  sh '''
 
-mkdir -p ${CONTAINERD_CONFIG}/certs.d/${NEXUS_URL}${REPO_PORT}/
+  mkdir -p ${CONTAINERD_CONFIG}/certs.d/${NEXUS_URL}${REPO_PORT}/
 
-cat <<EOF > ${CONTAINERD_CONFIG}/certs.d/${NEXUS_URL}${REPO_PORT}/hosts.toml
+  cat <<EOF > ${CONTAINERD_CONFIG}/certs.d/${NEXUS_URL}${REPO_PORT}/hosts.toml
 
-server = "https://registry-1.docker.io"
+  server = "https://registry-1.docker.io"
 
-[host."http://${NEXUS_URL}${REPO_PORT}"]
+  [host."http://${NEXUS_URL}${REPO_PORT}"]
 
-capabilities = ["pull", "resolve", "push"]
+  capabilities = ["pull", "resolve", "push"]
 
-skip_verify = true
+  skip_verify = true
 
-'''
-'''
+  '''
+```
 
 
 
